@@ -6,20 +6,20 @@
 #include <QMessageBox>
 #include "header/xlsxdocument.h"
 #include <QHeaderView>
-#include "header/xlsxformat.h"
 #include <QSpacerItem>
 #include <algorithm>
-#include <QApplication>  // Dùng cho qApp
-
-// Hàm trợ giúp: Xóa sạch các widget trong layout hiện có
-void clearLayout(QLayout *layout) {
+#include <QApplication>
+#include <QSqlQuery>
+#include "Translation.h"
+#include <QSignalBlocker>
+// Hàm xóa sạch layout
+void Cuaso::clearLayout(QLayout *layout) {
     if (!layout)
         return;
-    while (QLayoutItem *item = layout->takeAt(0)) {
-        if (item->widget()) {
-            item->widget()->setParent(nullptr);
-            item->widget()->deleteLater();
-        }
+    QLayoutItem *item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        if (item->widget())
+            delete item->widget();
         delete item;
     }
 }
@@ -27,39 +27,37 @@ void clearLayout(QLayout *layout) {
 Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     setMinimumSize(800, 600);
 
-    // Khởi tạo các widget trang cho QTabWidget
     first = new QWidget();
     second = new QWidget();
     third = new QWidget();
 
-    // Tạo các nút chức năng, sử dụng tr() cho hỗ trợ đa ngôn ngữ
     m_nutbam  = new QPushButton(tr("Hãy nạp file excel 1"), this);
     m_nutbam1 = new QPushButton(tr("Hãy nạp file excel 2"), this);
     sosanh    = new QPushButton(tr("Ấn để so sánh"), this);
-    m_export  = new QPushButton(tr("Xuất dữ liệu language"), this);
     m_exit    = new QPushButton(tr("Ấn để thoát"), this);
 
-    // Đặt chính sách kích thước cho các nút
     m_nutbam->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_nutbam1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sosanh->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_export->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_exit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // Khởi tạo TableWidget để hiển thị kết quả so sánh
     m_tableWidget = new QTableWidget();
     m_tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    // Khởi tạo QTabWidget và bố trí giao diện
     m_tab = new QTabWidget(this);
-
+    languageCombo = new QComboBox(this);
+    connect(languageCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int){
+        QString lang = languageCombo->currentData().toString();
+        Translate::instance().setCurrentLanguage(lang);
+        updateUiTranslations();
+    });
     QVBoxLayout *buttonLayout = new QVBoxLayout;
+    buttonLayout->addWidget(languageCombo);
     buttonLayout->addWidget(m_nutbam);
     buttonLayout->addWidget(m_nutbam1);
     buttonLayout->addWidget(sosanh);
-    buttonLayout->addWidget(m_export);  // Thêm nút xuất dữ liệu
     buttonLayout->addWidget(m_exit);
     buttonLayout->addStretch();
 
@@ -69,40 +67,75 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
 
     setLayout(mainLayout);
 
-    // Kết nối các nút với các slot tương ứng
     connect(m_nutbam,  &QPushButton::clicked, this, &Cuaso::loadFile);
     connect(m_nutbam1, &QPushButton::clicked, this, &Cuaso::loadFile2);
     connect(sosanh,    &QPushButton::clicked, this, &Cuaso::compare);
-    connect(m_export,  &QPushButton::clicked, this, &Cuaso::exportLanguageData);
-    connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close); // Kết nối nút thoát
+    connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close);
 }
 
-void Cuaso::loadFile(){
-    QString newFilePath = QFileDialog::getOpenFileName(this, tr("Chọn file excel"), "", tr("Excel Files (*.xlsx)"));
-    if(newFilePath.isEmpty()){
-        qDebug() << tr("Hãy chọn lại file excel 1!");
+void Cuaso::loadFile() {
+    QString currentLang = Translate::instance().currentLanguage();
+    QString fileTitle = Translate::instance().translate("Chọn file excel", currentLang);
+    QString fileFilter = Translate::instance().translate("Excel Files (*.xlsx)", currentLang);
+    QString newFilePath = QFileDialog::getOpenFileName(this, fileTitle, "", fileFilter);
+    if (newFilePath.isEmpty()) {
+        qDebug() << Translate::instance().translate("Hãy chọn lại file excel 1!", currentLang);
     } else {
         filepath1 = newFilePath;
-        m_nutbam->setText(tr("Đã nạp file 1"));
-        QMessageBox::information(this, tr("NẠP FILE"), tr("Bạn đã nạp thành công file 1"));
-        qDebug() << tr("File 1 được nạp:") << filepath1;
+        m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", currentLang));
+        QMessageBox::information(this,
+                                 Translate::instance().translate("NẠP FILE", currentLang),
+                                 Translate::instance().translate("Bạn đã nạp thành công file 1", currentLang));
+        qDebug() << Translate::instance().translate("File 1 được nạp:", currentLang) << filepath1;
     }
 }
 
-void Cuaso::loadFile2(){
-    QString newFilePath = QFileDialog::getOpenFileName(this, tr("Chọn file excel"), "", tr("Excel Files (*.xlsx)"));
-    if(newFilePath.isEmpty()){
-        qDebug() << tr("Hãy chọn lại file excel 2!");
+void Cuaso::loadFile2() {
+    QString currentLang = Translate::instance().currentLanguage();
+    if (!Translate::instance().currentFilePath().isEmpty()) {
+        qDebug() << Translate::instance().translate("File excel 2 đã được nạp, không cần cập nhật lại.", currentLang);
+        return;
+    }
+
+    QString fileTitle = Translate::instance().translate("Chọn file excel", currentLang);
+    QString fileFilter = Translate::instance().translate("Excel Files (*.xlsx)", currentLang);
+    QString newFilePath = QFileDialog::getOpenFileName(this, fileTitle, "", fileFilter);
+    if (newFilePath.isEmpty()) {
+        qDebug() << Translate::instance().translate("Hãy chọn lại file excel 2!", currentLang);
     } else {
         filepath2 = newFilePath;
-        m_nutbam1->setText(tr("Đã nạp file 2"));
-        QMessageBox::information(this, tr("NẠP FILE"), tr("Bạn đã nạp thành công file 2"));
-        qDebug() << tr("File 2 được nạp:") << filepath2;
+        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", currentLang));
+        QMessageBox::information(this,
+                                 Translate::instance().translate("NẠP FILE", currentLang),
+                                 Translate::instance().translate("Bạn đã nạp thành công file 2", currentLang));
+        qDebug() << Translate::instance().translate("File 2 được nạp:", currentLang) << filepath2;
+        if (Translate::instance().loadTranslations(filepath2)) {
+            qDebug() << "Translation data loaded from file 2.";
+            {
+                QSignalBlocker blocker(languageCombo);
+                languageCombo->clear();
+                QStringList langs = Translate::instance().availableLanguages();
+                for (const QString &lang : langs) {
+                    languageCombo->addItem(lang, lang);
+                }
+                // Nếu currentLanguage đã được đặt và nằm trong danh sách, cập nhật current index
+                if (!currentLang.isEmpty() && langs.contains(currentLang)) {
+                    int index = languageCombo->findData(currentLang);
+                    if (index >= 0)
+                        languageCombo->setCurrentIndex(index);
+                }
+            }
+        } else {
+            qDebug() << "Failed to load translation data from file 2.";
+        }
     }
 }
 
-void Cuaso::compare(){
-    if(filepath1.isEmpty() || filepath2.isEmpty()){
+
+
+
+void Cuaso::compare() {
+    if (filepath1.isEmpty() || filepath2.isEmpty()) {
         QMessageBox::critical(this, tr("Nhập lại"), tr("Chưa có đủ file"));
         qDebug() << tr("Chưa nạp đủ file để so sánh!");
         return;
@@ -110,16 +143,24 @@ void Cuaso::compare(){
 
     QXlsx::Document doc1(filepath1);
     QXlsx::Document doc2(filepath2);
-
-    // Nếu không thể mở file, in thông báo lỗi
-    if (!doc1.load() || !doc2.load()){
+    if (!doc1.load() || !doc2.load()) {
         QMessageBox::information(this, tr("Nhập lại"), tr("Không thể mở file excel"));
         qDebug() << tr("Lỗi khi mở file!");
         return;
     }
 
+    // Kiểm tra tính hợp lệ của dữ liệu (ví dụ: nếu số hàng hoặc cột = 0, coi như file không hợp lệ)
+    QXlsx::CellRange range1 = doc1.dimension();
+    QXlsx::CellRange range2 = doc2.dimension();
+    if (range1.lastRow() == 0 || range1.lastColumn() == 0 ||
+        range2.lastRow() == 0 || range2.lastColumn() == 0) {
+        QMessageBox::critical(this, tr("Error"), tr("File excel không hợp lệ cho việc so sánh"));
+        return;
+    }
+
     compareSheets(doc1, doc2);
 }
+
 
 void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &doc2) {
     QXlsx::CellRange range1 = doc1.dimension();
@@ -127,67 +168,59 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
     int maxRow = std::max(range1.lastRow(), range2.lastRow());
     int maxCol = std::max(range1.lastColumn(), range2.lastColumn());
 
-    // Cập nhật m_tableWidget cho trang so sánh
-    m_tableWidget->clear();
-    m_tableWidget->setRowCount(maxRow);
-    m_tableWidget->setColumnCount(maxCol);
-    m_tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    m_tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-
+    // Tạo widget so sánh mới
+    QTableWidget *compareWidget = new QTableWidget();
+    compareWidget->setRowCount(maxRow);
+    compareWidget->setColumnCount(maxCol);
+    compareWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    compareWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    QString currentLang = Translate::instance().currentLanguage();
     for (int i = 1; i <= maxRow; i++) {
         for (int j = 1; j <= maxCol; j++) {
             QVariant val1 = doc1.read(i, j);
             QVariant val2 = doc2.read(i, j);
             QTableWidgetItem *item = new QTableWidgetItem();
             if (val1 != val2) {
-                // Hiển thị điểm khác biệt với nền đỏ
-                item->setText(tr("❌ Khác"));
+                item->setText(Translate::instance().translate("❌ Khác", currentLang));
                 item->setBackground(Qt::red);
                 item->setForeground(Qt::white);
             } else {
                 item->setText(val1.toString());
             }
-            m_tableWidget->setItem(i - 1, j - 1, item);
+            compareWidget->setItem(i - 1, j - 1, item);
         }
     }
 
-    // Tạo bảng cho file 1 và file 2
     QTableWidget *table1 = createTableFromDocument(doc1, maxRow, maxCol);
     QTableWidget *table2 = createTableFromDocument(doc2, maxRow, maxCol);
 
-    // Cập nhật tab Trang 1
-    if (first->layout()) {
-        clearLayout(first->layout());
-    } else {
+    if (!first->layout())
         first->setLayout(new QVBoxLayout());
-    }
+    else
+        clearLayout(first->layout());
     first->layout()->addWidget(table1);
 
-    // Cập nhật tab Trang 2
-    if (second->layout()) {
-        clearLayout(second->layout());
-    } else {
+
+    if (!second->layout())
         second->setLayout(new QVBoxLayout());
-    }
+    else
+        clearLayout(second->layout());
     second->layout()->addWidget(table2);
 
-    // Cập nhật tab So sánh
-    if (third->layout()) {
-        clearLayout(third->layout());
-    } else {
+    if (!third->layout())
         third->setLayout(new QVBoxLayout());
-    }
-    // Đảm bảo m_tableWidget được chuyển sang tab này
-    m_tableWidget->setParent(nullptr);
-    third->layout()->addWidget(m_tableWidget);
+    else
+        clearLayout(third->layout());
+    third->layout()->addWidget(compareWidget);
 
-    // Cập nhật các tab trong QTabWidget
     m_tab->clear();
-    m_tab->addTab(first, tr("Trang 1"));
-    m_tab->addTab(second, tr("Trang 2"));
-    m_tab->addTab(third, tr("So sánh"));
+    m_tab->addTab(first,Translate::instance().translate("Trang 1", currentLang));
+    m_tab->addTab(second,Translate::instance().translate("Trang 2", currentLang));
+    m_tab->addTab(third,Translate::instance().translate("So sánh", currentLang));
 
     adjustSize();
+
+    m_tableWidget = compareWidget;
 }
 
 QTableWidget* Cuaso::createTableFromDocument(const QXlsx::Document &doc, int maxRow, int maxCol) {
@@ -207,44 +240,16 @@ QTableWidget* Cuaso::createTableFromDocument(const QXlsx::Document &doc, int max
     return table;
 }
 
-void Cuaso::exportLanguageData() {
-    if(filepath1.isEmpty() || filepath2.isEmpty()){
-        QMessageBox::warning(this, tr("Xuất dữ liệu"), tr("Chưa nạp đủ file excel để xuất dữ liệu!"));
-        return;
+void Cuaso::updateUiTranslations() {
+    QString lang = Translate::instance().currentLanguage();
+    m_nutbam->setText(Translate::instance().translate("Hãy nạp file excel 1", lang));
+    m_nutbam1->setText(Translate::instance().translate("Hãy nạp file excel 2", lang));
+    sosanh->setText(Translate::instance().translate("Ấn để so sánh", lang));
+    m_exit->setText(Translate::instance().translate("Ấn để thoát", lang));
+
+    if (m_tab->count() >= 3) {
+        m_tab->setTabText(0, Translate::instance().translate("Trang 1", lang));
+        m_tab->setTabText(1, Translate::instance().translate("Trang 2", lang));
+        m_tab->setTabText(2, Translate::instance().translate("So sánh", lang));
     }
-
-    QXlsx::Document doc1(filepath1);
-    QXlsx::Document doc2(filepath2);
-
-    if (!doc1.load() || !doc2.load()){
-        QMessageBox::critical(this, tr("Xuất dữ liệu"), tr("Không thể mở file excel!"));
-        return;
-    }
-
-    // Xác định kích thước tổng hợp từ hai file
-    QXlsx::CellRange range1 = doc1.dimension();
-    QXlsx::CellRange range2 = doc2.dimension();
-    int maxRow = std::max(range1.lastRow(), range2.lastRow());
-    int maxCol = std::max(range1.lastColumn(), range2.lastColumn());
-
-    // Tạo một document mới để ghi dữ liệu kết hợp: nếu có điểm khác, dùng giá trị từ file 2 (đã cập nhật)
-    QXlsx::Document exportDoc;
-    for (int i = 1; i <= maxRow; i++){
-        for (int j = 1; j <= maxCol; j++){
-            QVariant val1 = doc1.read(i, j);
-            QVariant val2 = doc2.read(i, j);
-            QVariant newVal = (val1 != val2) ? val2 : val1;
-            exportDoc.write(i, j, newVal);
-        }
-    }
-
-    QString exportPath = QFileDialog::getSaveFileName(this, tr("Xuất file ngôn ngữ"), "", tr("Excel Files (*.xlsx)"));
-    if(exportPath.isEmpty()){
-        return;
-    }
-
-    if(exportDoc.saveAs(exportPath))
-        QMessageBox::information(this, tr("Xuất dữ liệu"), tr("Xuất dữ liệu ngôn ngữ thành công!"));
-    else
-        QMessageBox::critical(this, tr("Xuất dữ liệu"), tr("Xuất dữ liệu ngôn ngữ thất bại!"));
 }

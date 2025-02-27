@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,11 +11,13 @@ CONFIG += c++17
 
 SOURCES += \
     Cuaso.cpp \
+    Translation.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     Cuaso.h \
+    Translation.h \
     mainwindow.h
 
 FORMS += \
@@ -31,3 +33,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 DEFINES += PROJECT_PATH=\\\"$$PWD\\\"
 
+TRANSLATIONS = app_vi.ts app_en.ts app_fr.ts
