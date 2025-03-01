@@ -286,12 +286,12 @@ Makefile: ../../Code_Qt.pro ../../../../QT/6.8.1/mingw_64/mkspecs/win32-g++/qmak
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/resolve_config.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/exclusive_builds_post.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/default_post.prf \
+		../../../../QT/6.8.1/mingw_64/mkspecs/features/resources_functions.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/qtquickcompiler.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/precompile_header.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/warn_on.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/permissions.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/qt.prf \
-		../../../../QT/6.8.1/mingw_64/mkspecs/features/resources_functions.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/resources.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/moc.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/win32/opengl.prf \
@@ -304,9 +304,17 @@ Makefile: ../../Code_Qt.pro ../../../../QT/6.8.1/mingw_64/mkspecs/win32-g++/qmak
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/yacc.prf \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/lex.prf \
 		../../Code_Qt.pro \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6QuickControls2.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6Quick.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6OpenGL.prl \
 		../../../../QT/6.8.1/mingw_64/lib/Qt6Widgets.prl \
 		../../../../QT/6.8.1/mingw_64/lib/Qt6Gui.prl \
 		../../../../QT/6.8.1/mingw_64/lib/Qt6Sql.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6QmlMeta.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6QmlModels.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6QmlWorkerScript.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6Qml.prl \
+		../../../../QT/6.8.1/mingw_64/lib/Qt6Network.prl \
 		../../../../QT/6.8.1/mingw_64/lib/Qt6Core.prl \
 		../../../../QT/6.8.1/mingw_64/lib/Qt6EntryPoint.prl \
 		../../../../QT/6.8.1/mingw_64/mkspecs/features/build_pass.prf
@@ -527,12 +535,12 @@ Makefile: ../../Code_Qt.pro ../../../../QT/6.8.1/mingw_64/mkspecs/win32-g++/qmak
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/resolve_config.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/exclusive_builds_post.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/default_post.prf:
+../../../../QT/6.8.1/mingw_64/mkspecs/features/resources_functions.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/qtquickcompiler.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/precompile_header.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/warn_on.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/permissions.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/qt.prf:
-../../../../QT/6.8.1/mingw_64/mkspecs/features/resources_functions.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/resources.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/moc.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/win32/opengl.prf:
@@ -545,9 +553,17 @@ Makefile: ../../Code_Qt.pro ../../../../QT/6.8.1/mingw_64/mkspecs/win32-g++/qmak
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/yacc.prf:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/lex.prf:
 ../../Code_Qt.pro:
+../../../../QT/6.8.1/mingw_64/lib/Qt6QuickControls2.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6Quick.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6OpenGL.prl:
 ../../../../QT/6.8.1/mingw_64/lib/Qt6Widgets.prl:
 ../../../../QT/6.8.1/mingw_64/lib/Qt6Gui.prl:
 ../../../../QT/6.8.1/mingw_64/lib/Qt6Sql.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6QmlMeta.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6QmlModels.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6QmlWorkerScript.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6Qml.prl:
+../../../../QT/6.8.1/mingw_64/lib/Qt6Network.prl:
 ../../../../QT/6.8.1/mingw_64/lib/Qt6Core.prl:
 ../../../../QT/6.8.1/mingw_64/lib/Qt6EntryPoint.prl:
 ../../../../QT/6.8.1/mingw_64/mkspecs/features/build_pass.prf:

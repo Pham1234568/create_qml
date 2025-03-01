@@ -33,7 +33,6 @@ bool Translate::loadTranslations(const QString&filePath){
 
     for(int row=firstDataRow;row<=lastRow;row++){
         QVariant keyVar=doc.read(row,1);
-
         QString key=keyVar.toString().trimmed();
 
         for(int col=2;col<=lastCol;col++){

@@ -30,16 +30,36 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     first = new QWidget();
     second = new QWidget();
     third = new QWidget();
+    QString buttonStyle =
+        "QPushButton {"
+        "  border: 2px solid #8f8f91;"
+        "  border-radius: 12px;"
+        "  background-color: cyan;"
+        "  min-width: 80px;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: maroon;"
+        "}";
 
     m_nutbam  = new QPushButton(tr("Hãy nạp file excel 1"), this);
     m_nutbam1 = new QPushButton(tr("Hãy nạp file excel 2"), this);
+    m_nutbamss= new QPushButton(tr("Hãy nạp file ngôn ngữ"),this);
     sosanh    = new QPushButton(tr("Ấn để so sánh"), this);
     m_exit    = new QPushButton(tr("Ấn để thoát"), this);
-
+    searchline = new QLineEdit(this);
+    QString currentlang=Translate::instance().currentLanguage();
+    searchline->setPlaceholderText((Translate::instance().translate("Nhập từ khóa để tìm kiếm",currentlang)));
     m_nutbam->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_nutbam1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_nutbamss->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sosanh->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_exit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    m_nutbam->setStyleSheet(buttonStyle);
+    m_nutbam1->setStyleSheet(buttonStyle);
+    m_nutbamss->setStyleSheet(buttonStyle);
+    sosanh->setStyleSheet(buttonStyle);
+    m_exit->setStyleSheet(buttonStyle);
 
     m_tableWidget = new QTableWidget();
     m_tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -57,20 +77,39 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     buttonLayout->addWidget(languageCombo);
     buttonLayout->addWidget(m_nutbam);
     buttonLayout->addWidget(m_nutbam1);
+    buttonLayout->addWidget(m_nutbamss);
     buttonLayout->addWidget(sosanh);
     buttonLayout->addWidget(m_exit);
     buttonLayout->addStretch();
 
+    QVBoxLayout *beside =new QVBoxLayout;
+    beside->addWidget(searchline);
+    beside->addWidget(m_tab);
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->addLayout(buttonLayout);
-    mainLayout->addWidget(m_tab, 1);
+    mainLayout->addLayout(beside, 1);
 
     setLayout(mainLayout);
 
     connect(m_nutbam,  &QPushButton::clicked, this, &Cuaso::loadFile);
-    connect(m_nutbam1, &QPushButton::clicked, this, &Cuaso::loadFile2);
+    connect(m_nutbam1, &QPushButton::clicked, this, &Cuaso::loadFile3);
+    connect(m_nutbamss,&QPushButton::clicked,this,  &Cuaso::loadFile2);
     connect(sosanh,    &QPushButton::clicked, this, &Cuaso::compare);
     connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close);
+    connect(searchline,&QLineEdit::textChanged,this,&Cuaso::filterTable);
+}
+void Cuaso::filterTable(const QString &text) {
+    for (int row = 0; row < m_tableWidget->rowCount(); ++row) {
+        bool rowVisible = false;
+        for (int col = 0; col < m_tableWidget->columnCount(); ++col) {
+            QTableWidgetItem *item = m_tableWidget->item(row, col);
+            if (item && item->text().contains(text, Qt::CaseInsensitive)) {
+                rowVisible = true;
+                break;
+            }
+        }
+        m_tableWidget->setRowHidden(row, !rowVisible);
+    }
 }
 
 void Cuaso::loadFile() {
@@ -89,7 +128,22 @@ void Cuaso::loadFile() {
         qDebug() << Translate::instance().translate("File 1 được nạp:", currentLang) << filepath1;
     }
 }
-
+void Cuaso::loadFile3(){
+    QString currentLang = Translate::instance().currentLanguage();
+    QString fileTitle = Translate::instance().translate("Chọn file excel", currentLang);
+    QString fileFilter = Translate::instance().translate("Excel Files (*.xlsx)", currentLang);
+    QString newFilePath = QFileDialog::getOpenFileName(this, fileTitle, "", fileFilter);
+    if (newFilePath.isEmpty()) {
+        qDebug() << Translate::instance().translate("Hãy chọn lại file excel 2!", currentLang);
+    } else {
+        filepath3 = newFilePath;
+        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", currentLang));
+        QMessageBox::information(this,
+                                    Translate::instance().translate("NẠP FILE", currentLang),
+                                 Translate::instance().translate("Bạn đã nạp thành công file 2", currentLang));
+        qDebug() << Translate::instance().translate("File 1 được nạp:", currentLang) << filepath3;
+    }
+}
 void Cuaso::loadFile2() {
     QString currentLang = Translate::instance().currentLanguage();
     if (!Translate::instance().currentFilePath().isEmpty()) {
@@ -97,17 +151,17 @@ void Cuaso::loadFile2() {
         return;
     }
 
-    QString fileTitle = Translate::instance().translate("Chọn file excel", currentLang);
+    QString fileTitle = Translate::instance().translate("Chọn file ngôn ngữ", currentLang);
     QString fileFilter = Translate::instance().translate("Excel Files (*.xlsx)", currentLang);
     QString newFilePath = QFileDialog::getOpenFileName(this, fileTitle, "", fileFilter);
     if (newFilePath.isEmpty()) {
         qDebug() << Translate::instance().translate("Hãy chọn lại file excel 2!", currentLang);
     } else {
         filepath2 = newFilePath;
-        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", currentLang));
+        m_nutbamss->setText(Translate::instance().translate("Đã nạp xong file ngôn ngữ", currentLang));
         QMessageBox::information(this,
                                  Translate::instance().translate("NẠP FILE", currentLang),
-                                 Translate::instance().translate("Bạn đã nạp thành công file 2", currentLang));
+                                 Translate::instance().translate("Bạn đã nạp thành công file ngôn ngữ", currentLang));
         qDebug() << Translate::instance().translate("File 2 được nạp:", currentLang) << filepath2;
         if (Translate::instance().loadTranslations(filepath2)) {
             qDebug() << "Translation data loaded from file 2.";
@@ -116,9 +170,14 @@ void Cuaso::loadFile2() {
                 languageCombo->clear();
                 QStringList langs = Translate::instance().availableLanguages();
                 for (const QString &lang : langs) {
+                    QString iconPath = QDir::currentPath() + "/1.png";  // Tạo đường dẫn tuyệt đối
+                    qDebug() << "Icon path:" << iconPath;
+                    QIcon icon(iconPath);
+                    int index = languageCombo->count(); // Lấy chỉ số mục tiếp theo
                     languageCombo->addItem(lang, lang);
+                    languageCombo->setItemIcon(index, QIcon("1.png")); // Đặt icon đúng mục
                 }
-                // Nếu currentLanguage đã được đặt và nằm trong danh sách, cập nhật current index
+
                 if (!currentLang.isEmpty() && langs.contains(currentLang)) {
                     int index = languageCombo->findData(currentLang);
                     if (index >= 0)
@@ -135,21 +194,20 @@ void Cuaso::loadFile2() {
 
 
 void Cuaso::compare() {
-    if (filepath1.isEmpty() || filepath2.isEmpty()) {
+    if (filepath1.isEmpty() || filepath3.isEmpty()) {
         QMessageBox::critical(this, tr("Nhập lại"), tr("Chưa có đủ file"));
         qDebug() << tr("Chưa nạp đủ file để so sánh!");
         return;
     }
 
     QXlsx::Document doc1(filepath1);
-    QXlsx::Document doc2(filepath2);
+    QXlsx::Document doc2(filepath3);
     if (!doc1.load() || !doc2.load()) {
         QMessageBox::information(this, tr("Nhập lại"), tr("Không thể mở file excel"));
         qDebug() << tr("Lỗi khi mở file!");
         return;
     }
 
-    // Kiểm tra tính hợp lệ của dữ liệu (ví dụ: nếu số hàng hoặc cột = 0, coi như file không hợp lệ)
     QXlsx::CellRange range1 = doc1.dimension();
     QXlsx::CellRange range2 = doc2.dimension();
     if (range1.lastRow() == 0 || range1.lastColumn() == 0 ||
@@ -168,7 +226,6 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
     int maxRow = std::max(range1.lastRow(), range2.lastRow());
     int maxCol = std::max(range1.lastColumn(), range2.lastColumn());
 
-    // Tạo widget so sánh mới
     QTableWidget *compareWidget = new QTableWidget();
     compareWidget->setRowCount(maxRow);
     compareWidget->setColumnCount(maxCol);
@@ -182,7 +239,7 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
             QTableWidgetItem *item = new QTableWidgetItem();
             if (val1 != val2) {
                 item->setText(Translate::instance().translate("❌ Khác", currentLang));
-                item->setBackground(Qt::red);
+                item->setBackground(Qt::darkCyan);
                 item->setForeground(Qt::white);
             } else {
                 item->setText(val1.toString());
@@ -218,7 +275,7 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
     m_tab->addTab(second,Translate::instance().translate("Trang 2", currentLang));
     m_tab->addTab(third,Translate::instance().translate("So sánh", currentLang));
 
-    adjustSize();
+    // adjustSize();
 
     m_tableWidget = compareWidget;
 }
@@ -244,9 +301,10 @@ void Cuaso::updateUiTranslations() {
     QString lang = Translate::instance().currentLanguage();
     m_nutbam->setText(Translate::instance().translate("Hãy nạp file excel 1", lang));
     m_nutbam1->setText(Translate::instance().translate("Hãy nạp file excel 2", lang));
+    m_nutbamss->setText(Translate::instance().translate("Hãy nạp file ngôn ngữ",lang));
     sosanh->setText(Translate::instance().translate("Ấn để so sánh", lang));
     m_exit->setText(Translate::instance().translate("Ấn để thoát", lang));
-
+    searchline->setPlaceholderText((Translate::instance().translate("Nhập từ khóa để tìm kiếm",lang)));
     if (m_tab->count() >= 3) {
         m_tab->setTabText(0, Translate::instance().translate("Trang 1", lang));
         m_tab->setTabText(1, Translate::instance().translate("Trang 2", lang));

@@ -11,7 +11,7 @@
 #include <QInputDialog>
 #include "header/xlsxdocument.h"
 #include <QDialog>
-
+#include <QLabel>
 class Cuaso : public QWidget {
     Q_OBJECT
 public:
@@ -19,28 +19,23 @@ public:
 
     void updateUiTranslations();
 
-    QComboBox *languageCombo;
-    QWidget *first;
-    QWidget *second;
-    QWidget *third;
-    QTabWidget *m_tab;
+    QPushButton *m_nutbam, *m_nutbam1, *m_nutbamss, *sosanh, *m_exit;
     QTableWidget *m_tableWidget;
-    QPushButton *m_nutbam;
-    QPushButton *m_nutbam1;
-    QPushButton *sosanh;
-    QPushButton *m_exit;
-    QString filepath1;
-    QString filepath2;
+    QTabWidget *m_tab;
+    QComboBox *languageCombo;
+    QWidget *first, *second, *third;
+    QString filepath1, filepath2, filepath3;
+    QLineEdit *searchline;
 
 private slots:
     void loadFile();
     void loadFile2();
     void compare();
-
+    void loadFile3();
+    void filterTable(const QString &text);
 private:
     void compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &doc2);
     QTableWidget* createTableFromDocument(const QXlsx::Document &doc, int maxRow, int maxCol);
     void clearLayout(QLayout *layout);
 };
-
 #endif // CUASO_H

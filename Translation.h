@@ -18,7 +18,7 @@ public:
     QString currentLanguage();
     void setCurrentLanguage(const QString&lang);
     QStringList availableLanguages();
-    // Hàm bổ sung: kiểm tra xem file dịch đã được nạp chưa.
+
     bool isLoaded() const { return !m_filePath.isEmpty(); }
     QString currentFilePath() const { return m_filePath; }
 

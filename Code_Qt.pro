@@ -1,4 +1,4 @@
-QT       += core gui sql
+QT       += core gui sql qml quick quick quickcontrols2
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -34,3 +34,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DEFINES += PROJECT_PATH=\\\"$$PWD\\\"
 
 TRANSLATIONS = app_vi.ts app_en.ts app_fr.ts
+
+DISTFILES +=
