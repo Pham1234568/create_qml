@@ -23,7 +23,7 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-QXLSX_PARENTPATH = D:/Code_Qt/QXlsx/QXlsx  # Đường dẫn đến thư viện
+QXLSX_PARENTPATH = C:\Users\tranv\OneDrive\Desktop\QXlsx\QXlsx  # Đường dẫn đến thư viện
 QXLSX_HEADERPATH = $$QXLSX_PARENTPATH/header/  # Thư mục chứa file .h
 QXLSX_SOURCEPATH = $$QXLSX_PARENTPATH/source/  # Thư mục chứa mã nguồn .cpp
 include($$QXLSX_PARENTPATH/QXlsx.pri)

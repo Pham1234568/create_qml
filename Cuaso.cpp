@@ -12,6 +12,7 @@
 #include <QSqlQuery>
 #include "Translation.h"
 #include <QSignalBlocker>
+#include <QSettings>
 // Hàm xóa sạch layout
 void Cuaso::clearLayout(QLayout *layout) {
     if (!layout)
@@ -97,6 +98,8 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     connect(sosanh,    &QPushButton::clicked, this, &Cuaso::compare);
     connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close);
     connect(searchline,&QLineEdit::textChanged,this,&Cuaso::filterTable);
+
+    loadLastSession(); // Tải lại đường dẫn tệp đã lưu
 }
 void Cuaso::filterTable(const QString &text) {
     for (int row = 0; row < m_tableWidget->rowCount(); ++row) {
@@ -310,4 +313,33 @@ void Cuaso::updateUiTranslations() {
         m_tab->setTabText(1, Translate::instance().translate("Trang 2", lang));
         m_tab->setTabText(2, Translate::instance().translate("So sánh", lang));
     }
+}
+void Cuaso::saveLastSession() {
+    QSettings settings("MyCompany", "MyApp");
+    settings.setValue("filepath1", filepath1);
+    settings.setValue("filepath2", filepath2);
+    settings.setValue("filepath3", filepath3);
+}
+void Cuaso::loadLastSession() {
+    QSettings settings("MyCompany", "MyApp");
+    filepath1 = settings.value("filepath1").toString();
+    filepath2 = settings.value("filepath2").toString();
+    filepath3 = settings.value("filepath3").toString();
+
+    QString currentLang = Translate::instance().currentLanguage();
+    if (!filepath1.isEmpty()) {
+        m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", currentLang));
+        qDebug() << "Loaded file 1:" << filepath1;
+    }
+    if (!filepath2.isEmpty()) {
+        m_nutbamss->setText(Translate::instance().translate("Đã nạp file ngôn ngữ", currentLang));
+        qDebug() << "Loaded file 2:" << filepath2;
+    }
+    if (!filepath3.isEmpty()) {
+        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", currentLang));
+        qDebug() << "Loaded file 3:" << filepath3;
+    }
+}
+Cuaso::~Cuaso() {
+    saveLastSession();
 }
