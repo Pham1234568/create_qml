@@ -37,5 +37,7 @@ private:
     void compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &doc2);
     QTableWidget* createTableFromDocument(const QXlsx::Document &doc, int maxRow, int maxCol);
     void clearLayout(QLayout *layout);
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
 };
 #endif // CUASO_H

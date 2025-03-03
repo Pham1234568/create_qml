@@ -534,6 +534,9 @@ release/moc_Cuaso.cpp: ../../Cuaso.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QPointF \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QUrl \
 		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QDialog \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QLabel \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/qlabel.h \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/qpicture.h \
 		release/moc_predefs.h \
 		../../../../QT/6.8.1/mingw_64/bin/moc.exe
 	D:\QT\6.8.1\mingw_64\bin\moc.exe $(DEFINES) --include D:/Code_Qt/Code_Qt/build/Desktop_Qt_6_8_1_MinGW_64_bit-Release/release/moc_predefs.h -ID:/QT/6.8.1/mingw_64/mkspecs/win32-g++ -ID:/Code_Qt/Code_Qt -ID:/Code_Qt/QXlsx/QXlsx -ID:/Code_Qt/QXlsx/QXlsx -ID:/Code_Qt/QXlsx/QXlsx/header -ID:/Code_Qt/QXlsx/QXlsx/header/win32-gcc -ID:/QT/6.8.1/mingw_64/include -ID:/QT/6.8.1/mingw_64/include/QtQuickControls2 -ID:/QT/6.8.1/mingw_64/include/QtQuick -ID:/QT/6.8.1/mingw_64/include/QtOpenGL -ID:/QT/6.8.1/mingw_64/include/QtWidgets -ID:/QT/6.8.1/mingw_64/include/QtGui/6.8.1 -ID:/QT/6.8.1/mingw_64/include/QtGui/6.8.1/QtGui -ID:/QT/6.8.1/mingw_64/include/QtGui -ID:/QT/6.8.1/mingw_64/include/QtSql -ID:/QT/6.8.1/mingw_64/include/QtQmlMeta -ID:/QT/6.8.1/mingw_64/include/QtQmlModels -ID:/QT/6.8.1/mingw_64/include/QtQmlWorkerScript -ID:/QT/6.8.1/mingw_64/include/QtQml -ID:/QT/6.8.1/mingw_64/include/QtQmlIntegration -ID:/QT/6.8.1/mingw_64/include/QtNetwork -ID:/QT/6.8.1/mingw_64/include/QtCore/6.8.1 -ID:/QT/6.8.1/mingw_64/include/QtCore/6.8.1/QtCore -ID:/QT/6.8.1/mingw_64/include/QtCore -I. -ID:/QT/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++ -ID:/QT/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/x86_64-w64-mingw32 -ID:/QT/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/backward -ID:/QT/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include -ID:/QT/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include-fixed -ID:/QT/Tools/mingw1310_64/x86_64-w64-mingw32/include ..\..\Cuaso.h -o release\moc_Cuaso.cpp
@@ -1305,6 +1308,9 @@ release/Cuaso.o: ../../Cuaso.cpp ../../Cuaso.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QPointF \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QUrl \
 		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QDialog \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QLabel \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/qlabel.h \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/qpicture.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QHBoxLayout \
 		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/qboxlayout.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/qlayout.h \
@@ -1331,7 +1337,13 @@ release/Cuaso.o: ../../Cuaso.cpp ../../Cuaso.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtSql/QSqlQuery \
 		../../../../../../QT/6.8.1/mingw_64/include/QtSql/qsqlquery.h \
 		../../Translation.h \
-		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QSignalBlocker
+		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QSignalBlocker \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QScrollBar \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/qscrollbar.h \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/QDragEnterEvent \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/QDropEvent \
+		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QMimeData \
+		../../../../../../QT/6.8.1/mingw_64/include/QtCore/qmimedata.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\Cuaso.o ..\..\Cuaso.cpp
 
 release/Translation.o: ../../Translation.cpp ../../Translation.h \
@@ -1774,6 +1786,9 @@ release/main.o: ../../main.cpp ../../../../../../QT/6.8.1/mingw_64/include/QtWid
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QPointF \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QUrl \
 		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QDialog \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/QLabel \
+		../../../../../../QT/6.8.1/mingw_64/include/QtWidgets/qlabel.h \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/qpicture.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QDir \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/qdir.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/qdirlisting.h \
@@ -1781,7 +1796,9 @@ release/main.o: ../../main.cpp ../../../../../../QT/6.8.1/mingw_64/include/QtWid
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/qfile.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/qfileinfo.h \
 		../../../../../../QT/6.8.1/mingw_64/include/QtCore/qtimezone.h \
-		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QCoreApplication
+		../../../../../../QT/6.8.1/mingw_64/include/QtCore/QCoreApplication \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/QFontDatabase \
+		../../../../../../QT/6.8.1/mingw_64/include/QtGui/qfontdatabase.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\main.o ..\..\main.cpp
 
 release/mainwindow.o: ../../mainwindow.cpp ../../mainwindow.h \

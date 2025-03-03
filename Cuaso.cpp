@@ -12,6 +12,11 @@
 #include <QSqlQuery>
 #include "Translation.h"
 #include <QSignalBlocker>
+#include<QScrollBar>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+
+#include <QMimeData>
 // Hàm xóa sạch layout
 void Cuaso::clearLayout(QLayout *layout) {
     if (!layout)
@@ -97,6 +102,7 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     connect(sosanh,    &QPushButton::clicked, this, &Cuaso::compare);
     connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close);
     connect(searchline,&QLineEdit::textChanged,this,&Cuaso::filterTable);
+    setAcceptDrops(true);
 }
 void Cuaso::filterTable(const QString &text) {
     for (int row = 0; row < m_tableWidget->rowCount(); ++row) {
@@ -112,6 +118,30 @@ void Cuaso::filterTable(const QString &text) {
     }
 }
 
+void Cuaso::dragEnterEvent(QDragEnterEvent *event) {
+    // Kiểm tra nếu có file và đuôi .xlsx
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urlList = event->mimeData()->urls();
+        if (!urlList.isEmpty()) {
+            QString fileName = urlList.first().toLocalFile();
+            if (fileName.endsWith(".xlsx", Qt::CaseInsensitive)) {
+                event->acceptProposedAction();
+            }
+        }
+    }
+}
+
+void Cuaso::dropEvent(QDropEvent *event) {
+    QList<QUrl> urlList = event->mimeData()->urls();
+    if (!urlList.isEmpty()) {
+        QString filePath = urlList.first().toLocalFile();
+        // Ví dụ: nếu file kéo vào là file excel đầu tiên
+        filepath1 = filePath;
+        m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", Translate::instance().currentLanguage()));
+        QMessageBox::information(this, tr("NẠP FILE"), tr("Bạn đã nạp thành công file 1 thông qua Drag & Drop"));
+        qDebug() << "File 1 nạp qua Drag & Drop:" << filepath1;
+    }
+}
 void Cuaso::loadFile() {
     QString currentLang = Translate::instance().currentLanguage();
     QString fileTitle = Translate::instance().translate("Chọn file excel", currentLang);
@@ -225,6 +255,10 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
     QXlsx::CellRange range2 = doc2.dimension();
     int maxRow = std::max(range1.lastRow(), range2.lastRow());
     int maxCol = std::max(range1.lastColumn(), range2.lastColumn());
+    int diffCount = 0;
+    int totalCells = maxRow * maxCol;
+
+
 
     QTableWidget *compareWidget = new QTableWidget();
     compareWidget->setRowCount(maxRow);
@@ -238,6 +272,7 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
             QVariant val2 = doc2.read(i, j);
             QTableWidgetItem *item = new QTableWidgetItem();
             if (val1 != val2) {
+                 diffCount++;
                 item->setText(Translate::instance().translate("❌ Khác", currentLang));
                 item->setBackground(Qt::darkCyan);
                 item->setForeground(Qt::white);
@@ -247,9 +282,15 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
             compareWidget->setItem(i - 1, j - 1, item);
         }
     }
-
     QTableWidget *table1 = createTableFromDocument(doc1, maxRow, maxCol);
     QTableWidget *table2 = createTableFromDocument(doc2, maxRow, maxCol);
+    double similarityPercent = 100.0 * (totalCells - diffCount) / totalCells;
+    QString report = tr("Tổng số ô: %1\nSố ô khác nhau: %2\nTỷ lệ tương đồng: %3%")
+                         .arg(totalCells)
+                         .arg(diffCount)
+                         .arg(similarityPercent, 0, 'f', 2);
+
+    QMessageBox::information(this, tr("Báo cáo so sánh"), report);
 
     if (!first->layout())
         first->setLayout(new QVBoxLayout());

@@ -1,13 +1,8 @@
-QT       += core gui sql qml quick quick quickcontrols2
+QT       += core gui sql qml quick quickcontrols2
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
-
-
-# You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
     Cuaso.cpp \
@@ -23,11 +18,24 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-QXLSX_PARENTPATH = D:/Code_Qt/QXlsx/QXlsx  # Đường dẫn đến thư viện
-QXLSX_HEADERPATH = $$QXLSX_PARENTPATH/header/  # Thư mục chứa file .h
-QXLSX_SOURCEPATH = $$QXLSX_PARENTPATH/source/  # Thư mục chứa mã nguồn .cpp
+# Cấu hình QXlsx: Hãy đảm bảo rằng đường dẫn thư viện QXlsx phù hợp với nền tảng
+win32 {
+    QXLSX_PARENTPATH = D:/Code_Qt/QXlsx/QXlsx
+}
+android {
+    # Đối với Android, bạn có thể cần đặt lại đường dẫn thư viện nếu có
+    QXLSX_PARENTPATH = $$PWD/../QXlsx/QXlsx
+}
+ios {
+    # Tương tự, cấu hình đường dẫn cho iOS
+    QXLSX_PARENTPATH = $$PWD/../QXlsx/QXlsx
+}
+
+QXLSX_HEADERPATH = $$QXLSX_PARENTPATH/header/
+QXLSX_SOURCEPATH = $$QXLSX_PARENTPATH/source/
 include($$QXLSX_PARENTPATH/QXlsx.pri)
-# Default rules for deployment.
+
+# Quy tắc cài đặt mặc định
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
@@ -35,4 +43,4 @@ DEFINES += PROJECT_PATH=\\\"$$PWD\\\"
 
 TRANSLATIONS = app_vi.ts app_en.ts app_fr.ts
 
-DISTFILES +=
+DISTFILES +=  # Lưu ý: bạn có thể cập nhật phần này nếu cần thêm file cho từng nền tảng
