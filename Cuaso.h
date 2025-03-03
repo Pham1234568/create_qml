@@ -16,7 +16,7 @@ class Cuaso : public QWidget {
     Q_OBJECT
 public:
     explicit Cuaso(QWidget *parent = nullptr);
-
+    ~Cuaso();
     void updateUiTranslations();
 
     QPushButton *m_nutbam, *m_nutbam1, *m_nutbamss, *sosanh, *m_exit;
@@ -33,6 +33,8 @@ private slots:
     void compare();
     void loadFile3();
     void filterTable(const QString &text);
+    void saveLastSession();
+    void loadLastSession();
 private:
     void compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &doc2);
     QTableWidget* createTableFromDocument(const QXlsx::Document &doc, int maxRow, int maxCol);
