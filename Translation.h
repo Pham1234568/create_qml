@@ -21,15 +21,15 @@ public:
 
     bool isLoaded() const { return !m_filePath.isEmpty(); }
     QString currentFilePath() const { return m_filePath; }
+    ~Translate();
 
 private:
 
     explicit Translate(QObject *parent = nullptr);
-    // Lưu theo dạng: key -> { language: translation, ... }
     QMap<QString, QMap<QString, QString>> m_translations;
     QStringList m_languages;
     QString m_currentLanguage;
-    bool m_loaded;         // true nếu file dịch đã được nạp thành công.
+    bool m_loaded;
     QString m_filePath;
 
 };

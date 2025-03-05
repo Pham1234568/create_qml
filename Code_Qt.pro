@@ -1,4 +1,4 @@
-QT       += core gui sql qml quick quickcontrols2
+QT       += core gui sql qml quick quickcontrols2 charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,7 +18,6 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-<<<<<<< HEAD
 # Cấu hình QXlsx: Hãy đảm bảo rằng đường dẫn thư viện QXlsx phù hợp với nền tảng
 win32 {
     QXLSX_PARENTPATH = D:/Code_Qt/QXlsx/QXlsx
@@ -34,11 +33,6 @@ ios {
 
 QXLSX_HEADERPATH = $$QXLSX_PARENTPATH/header/
 QXLSX_SOURCEPATH = $$QXLSX_PARENTPATH/source/
-=======
-QXLSX_PARENTPATH = C:\Users\tranv\OneDrive\Desktop\QXlsx\QXlsx  # Đường dẫn đến thư viện
-QXLSX_HEADERPATH = $$QXLSX_PARENTPATH/header/  # Thư mục chứa file .h
-QXLSX_SOURCEPATH = $$QXLSX_PARENTPATH/source/  # Thư mục chứa mã nguồn .cpp
->>>>>>> 412a74715d2c5647309ca090b2fb812d18cfa99a
 include($$QXLSX_PARENTPATH/QXlsx.pri)
 
 # Quy tắc cài đặt mặc định

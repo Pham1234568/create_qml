@@ -12,6 +12,10 @@
 #include "header/xlsxdocument.h"
 #include <QDialog>
 #include <QLabel>
+#include <QProgressBar>
+#include <QtCharts/QChartView>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QPieSlice>
 class Cuaso : public QWidget {
     Q_OBJECT
 public:
@@ -26,6 +30,7 @@ public:
     QWidget *first, *second, *third;
     QString filepath1, filepath2, filepath3;
     QLineEdit *searchline;
+    QProgressBar *load;
 
 private slots:
     void loadFile();
@@ -41,5 +46,6 @@ private:
     void clearLayout(QLayout *layout);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
+    void loadFromTranslate(QString filepath);
 };
 #endif // CUASO_H

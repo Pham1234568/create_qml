@@ -49,6 +49,9 @@ bool Translate::loadTranslations(const QString&filePath){
     return true;
 
 }
+Translate::~Translate(){
+     currentLanguage();
+}
 QString Translate::translate(const QString&key,const QString&lang){
 
     if(m_translations.contains(key)&&m_translations[key].contains(lang))

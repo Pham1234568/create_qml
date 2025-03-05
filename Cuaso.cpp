@@ -12,16 +12,17 @@
 #include <QSqlQuery>
 #include "Translation.h"
 #include <QSignalBlocker>
-<<<<<<< HEAD
 #include<QScrollBar>
 #include <QDragEnterEvent>
 #include <QDropEvent>
-
 #include <QMimeData>
-=======
 #include <QSettings>
->>>>>>> 412a74715d2c5647309ca090b2fb812d18cfa99a
-// Hàm xóa sạch layout
+#include <QTimer>
+#include<QStandardItem>
+#include<QStandardItemModel>
+#include<QListView>
+#include <QtCharts>
+
 void Cuaso::clearLayout(QLayout *layout) {
     if (!layout)
         return;
@@ -47,7 +48,7 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
         "  min-width: 80px;"
         "}"
         "QPushButton:pressed {"
-        "  background-color: maroon;"
+        "  background-color: white;"
         "}";
 
     m_nutbam  = new QPushButton(tr("Hãy nạp file excel 1"), this);
@@ -56,6 +57,12 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     sosanh    = new QPushButton(tr("Ấn để so sánh"), this);
     m_exit    = new QPushButton(tr("Ấn để thoát"), this);
     searchline = new QLineEdit(this);
+    load        =new QProgressBar(this);
+    load->setTextVisible(true);
+    load->setMaximum(100);
+    load->setMinimum(0);
+    load->setValue(0);
+    load->setVisible(false);
     QString currentlang=Translate::instance().currentLanguage();
     searchline->setPlaceholderText((Translate::instance().translate("Nhập từ khóa để tìm kiếm",currentlang)));
     m_nutbam->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -94,9 +101,11 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *beside =new QVBoxLayout;
     beside->addWidget(searchline);
     beside->addWidget(m_tab);
+    beside->addWidget(load);
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->addLayout(buttonLayout);
     mainLayout->addLayout(beside, 1);
+
 
     setLayout(mainLayout);
 
@@ -106,12 +115,11 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     connect(sosanh,    &QPushButton::clicked, this, &Cuaso::compare);
     connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close);
     connect(searchline,&QLineEdit::textChanged,this,&Cuaso::filterTable);
-<<<<<<< HEAD
     setAcceptDrops(true);
-=======
 
-    loadLastSession(); // Tải lại đường dẫn tệp đã lưu
->>>>>>> 412a74715d2c5647309ca090b2fb812d18cfa99a
+
+    loadLastSession();
+
 }
 void Cuaso::filterTable(const QString &text) {
     for (int row = 0; row < m_tableWidget->rowCount(); ++row) {
@@ -128,7 +136,7 @@ void Cuaso::filterTable(const QString &text) {
 }
 
 void Cuaso::dragEnterEvent(QDragEnterEvent *event) {
-    // Kiểm tra nếu có file và đuôi .xlsx
+
     if (event->mimeData()->hasUrls()) {
         QList<QUrl> urlList = event->mimeData()->urls();
         if (!urlList.isEmpty()) {
@@ -144,7 +152,7 @@ void Cuaso::dropEvent(QDropEvent *event) {
     QList<QUrl> urlList = event->mimeData()->urls();
     if (!urlList.isEmpty()) {
         QString filePath = urlList.first().toLocalFile();
-        // Ví dụ: nếu file kéo vào là file excel đầu tiên
+
         filepath1 = filePath;
         m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", Translate::instance().currentLanguage()));
         QMessageBox::information(this, tr("NẠP FILE"), tr("Bạn đã nạp thành công file 1 thông qua Drag & Drop"));
@@ -189,7 +197,6 @@ void Cuaso::loadFile2() {
         qDebug() << Translate::instance().translate("File excel 2 đã được nạp, không cần cập nhật lại.", currentLang);
         return;
     }
-
     QString fileTitle = Translate::instance().translate("Chọn file ngôn ngữ", currentLang);
     QString fileFilter = Translate::instance().translate("Excel Files (*.xlsx)", currentLang);
     QString newFilePath = QFileDialog::getOpenFileName(this, fileTitle, "", fileFilter);
@@ -202,30 +209,7 @@ void Cuaso::loadFile2() {
                                  Translate::instance().translate("NẠP FILE", currentLang),
                                  Translate::instance().translate("Bạn đã nạp thành công file ngôn ngữ", currentLang));
         qDebug() << Translate::instance().translate("File 2 được nạp:", currentLang) << filepath2;
-        if (Translate::instance().loadTranslations(filepath2)) {
-            qDebug() << "Translation data loaded from file 2.";
-            {
-                QSignalBlocker blocker(languageCombo);
-                languageCombo->clear();
-                QStringList langs = Translate::instance().availableLanguages();
-                for (const QString &lang : langs) {
-                    QString iconPath = QDir::currentPath() + "/1.png";  // Tạo đường dẫn tuyệt đối
-                    qDebug() << "Icon path:" << iconPath;
-                    QIcon icon(iconPath);
-                    int index = languageCombo->count(); // Lấy chỉ số mục tiếp theo
-                    languageCombo->addItem(lang, lang);
-                    languageCombo->setItemIcon(index, QIcon("1.png")); // Đặt icon đúng mục
-                }
-
-                if (!currentLang.isEmpty() && langs.contains(currentLang)) {
-                    int index = languageCombo->findData(currentLang);
-                    if (index >= 0)
-                        languageCombo->setCurrentIndex(index);
-                }
-            }
-        } else {
-            qDebug() << "Failed to load translation data from file 2.";
-        }
+        Cuaso::loadFromTranslate(filepath2);
     }
 }
 
@@ -267,39 +251,101 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
     int diffCount = 0;
     int totalCells = maxRow * maxCol;
 
-
-
     QTableWidget *compareWidget = new QTableWidget();
     compareWidget->setRowCount(maxRow);
     compareWidget->setColumnCount(maxCol);
     compareWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     compareWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     QString currentLang = Translate::instance().currentLanguage();
-    for (int i = 1; i <= maxRow; i++) {
-        for (int j = 1; j <= maxCol; j++) {
-            QVariant val1 = doc1.read(i, j);
-            QVariant val2 = doc2.read(i, j);
+    load->setVisible(true);
+    load->setValue(0);
+    load->setStyleSheet(
+        "QProgressBar {"
+        "    border: 2px solid grey;"
+        "    border-radius: 5px;"
+        "    background-color: #F0F0F0;"
+        "}"
+        "QProgressBar::chunk {"
+        "    background-color: green;"  // Màu xanh dương
+        "    width: 10px;"
+        "}"
+        );
+    QVector<QVector<QVariant>> data1(maxRow, QVector<QVariant>(maxCol));
+    QVector<QVector<QVariant>> data2(maxRow, QVector<QVariant>(maxCol));
+    for (int i = 0; i < maxRow; i++) {
+        for (int j = 0; j < maxCol; j++) {
+            data1[i][j] = doc1.read(i + 1, j + 1);
+            data2[i][j] = doc2.read(i + 1, j + 1);
+        }
+    }
+    QVector<QTableWidgetItem*> items;
+    for (int i = 0; i < maxRow; i++) {
+        for (int j = 0; j < maxCol; j++) {
             QTableWidgetItem *item = new QTableWidgetItem();
-            if (val1 != val2) {
-                 diffCount++;
+            if (data1[i][j] != data2[i][j]) {
+                diffCount++;
                 item->setText(Translate::instance().translate("❌ Khác", currentLang));
                 item->setBackground(Qt::darkCyan);
                 item->setForeground(Qt::white);
             } else {
-                item->setText(val1.toString());
+                item->setText(data1[i][j].toString());
             }
-            compareWidget->setItem(i - 1, j - 1, item);
+            items.append(item);
         }
+
+        for (int j = 0; j < maxCol; j++) {
+            compareWidget->setItem(i, j, items[i * maxCol + j]);
+        }
+        int progress = ((i + 1) * 100) / maxRow;
+        load->setValue(progress);
+        if (i % 10 == 0) qApp->processEvents();
     }
+    load->setValue(100);
+    QTimer::singleShot(500, [this]() { load->setVisible(false); });
     QTableWidget *table1 = createTableFromDocument(doc1, maxRow, maxCol);
     QTableWidget *table2 = createTableFromDocument(doc2, maxRow, maxCol);
-    double similarityPercent = 100.0 * (totalCells - diffCount) / totalCells;
-    QString report = tr("Tổng số ô: %1\nSố ô khác nhau: %2\nTỷ lệ tương đồng: %3%")
-                         .arg(totalCells)
-                         .arg(diffCount)
-                         .arg(similarityPercent, 0, 'f', 2);
 
-    QMessageBox::information(this, tr("Báo cáo so sánh"), report);
+
+    double similarityPercent = 100.0 * (totalCells - diffCount) / totalCells;
+    QWidget *tab4=new QWidget();
+    QVBoxLayout *layout_report = new QVBoxLayout(tab4);
+
+    QStandardItemModel *report_tab = new QStandardItemModel(tab4);
+    report_tab->setColumnCount(2);
+    report_tab->setHorizontalHeaderLabels(QStringList() << "Thành phần" << "Giá trị");
+
+    report_tab->appendRow(QList<QStandardItem*>{
+        new QStandardItem("Tổng số ô"), new QStandardItem(QString::number(totalCells))
+    });
+    report_tab->appendRow(QList<QStandardItem*>{
+        new QStandardItem("Số ô khác nhau"), new QStandardItem(QString::number(diffCount))
+    });
+    report_tab->appendRow(QList<QStandardItem*>{
+        new QStandardItem("Tỷ lệ tương đồng"), new QStandardItem(QString("%1%").arg(similarityPercent, 0, 'f', 2))
+    });
+
+    QTableView *table_Report = new QTableView(tab4);
+    table_Report->setModel(report_tab);
+    table_Report->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table_Report->verticalHeader()->setVisible(false);
+    table_Report->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table_Report->setSelectionMode(QAbstractItemView::NoSelection);
+
+    QPieSeries *series = new QPieSeries(tab4);
+    series->append("Ô giống nhau", totalCells - diffCount);
+    series->append("Ô khác nhau", diffCount);
+
+    QChart *chart = new QChart();
+    chart->addSeries(series);
+    chart->setTitle("Tỷ lệ ô giống và khác nhau");
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    QChartView *chartView = new QChartView(chart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
+    // Thêm bảng báo cáo và biểu đồ vào layout
+    layout_report->addWidget(table_Report);
+    layout_report->addWidget(chartView);
 
     if (!first->layout())
         first->setLayout(new QVBoxLayout());
@@ -324,7 +370,7 @@ void Cuaso::compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &do
     m_tab->addTab(first,Translate::instance().translate("Trang 1", currentLang));
     m_tab->addTab(second,Translate::instance().translate("Trang 2", currentLang));
     m_tab->addTab(third,Translate::instance().translate("So sánh", currentLang));
-
+    m_tab->addTab(tab4,"Báo cáo");
     // adjustSize();
 
     m_tableWidget = compareWidget;
@@ -349,44 +395,87 @@ QTableWidget* Cuaso::createTableFromDocument(const QXlsx::Document &doc, int max
 
 void Cuaso::updateUiTranslations() {
     QString lang = Translate::instance().currentLanguage();
-    m_nutbam->setText(Translate::instance().translate("Hãy nạp file excel 1", lang));
-    m_nutbam1->setText(Translate::instance().translate("Hãy nạp file excel 2", lang));
-    m_nutbamss->setText(Translate::instance().translate("Hãy nạp file ngôn ngữ",lang));
+
+    if (filepath1.isEmpty())
+        m_nutbam->setText(Translate::instance().translate("Hãy nạp file excel 1", lang));
+    else
+        m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", lang));
+    if (filepath3.isEmpty())
+        m_nutbam1->setText(Translate::instance().translate("Hãy nạp file excel 2", lang));
+    else
+        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", lang));
+    if (filepath2.isEmpty())
+        m_nutbamss->setText(Translate::instance().translate("Hãy nạp file ngôn ngữ", lang));
+    else
+        m_nutbamss->setText(Translate::instance().translate("Đã nạp file ngôn ngữ", lang));
+
     sosanh->setText(Translate::instance().translate("Ấn để so sánh", lang));
     m_exit->setText(Translate::instance().translate("Ấn để thoát", lang));
-    searchline->setPlaceholderText((Translate::instance().translate("Nhập từ khóa để tìm kiếm",lang)));
+    searchline->setPlaceholderText(Translate::instance().translate("Nhập từ khóa để tìm kiếm", lang));
+
     if (m_tab->count() >= 3) {
         m_tab->setTabText(0, Translate::instance().translate("Trang 1", lang));
         m_tab->setTabText(1, Translate::instance().translate("Trang 2", lang));
         m_tab->setTabText(2, Translate::instance().translate("So sánh", lang));
     }
 }
+
 void Cuaso::saveLastSession() {
     QSettings settings("MyCompany", "MyApp");
     settings.setValue("filepath1", filepath1);
     settings.setValue("filepath2", filepath2);
     settings.setValue("filepath3", filepath3);
+    settings.setValue("lastLanguage", Translate::instance().currentLanguage());
 }
 void Cuaso::loadLastSession() {
     QSettings settings("MyCompany", "MyApp");
     filepath1 = settings.value("filepath1").toString();
     filepath2 = settings.value("filepath2").toString();
     filepath3 = settings.value("filepath3").toString();
+    QString savedLang = settings.value("lastLanguage").toString();
 
-    QString currentLang = Translate::instance().currentLanguage();
     if (!filepath1.isEmpty()) {
-        m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", currentLang));
+        m_nutbam->setText(Translate::instance().translate("Đã nạp file 1", savedLang));
         qDebug() << "Loaded file 1:" << filepath1;
     }
     if (!filepath2.isEmpty()) {
-        m_nutbamss->setText(Translate::instance().translate("Đã nạp file ngôn ngữ", currentLang));
-        qDebug() << "Loaded file 2:" << filepath2;
+         qDebug() << "Loaded file ngon ngu:" << filepath2;
+        m_nutbamss->setText(Translate::instance().translate("Đã nạp file ngôn ngữ", savedLang));
+        Cuaso::loadFromTranslate(filepath2);
+        if (!savedLang.isEmpty() && Translate::instance().availableLanguages().contains(savedLang)) {
+            Translate::instance().setCurrentLanguage(savedLang);
+            int index = languageCombo->findData(savedLang);
+            if (index >= 0) {
+                languageCombo->setCurrentIndex(index);
+            }
+        }
+        updateUiTranslations();
     }
+
     if (!filepath3.isEmpty()) {
-        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", currentLang));
-        qDebug() << "Loaded file 3:" << filepath3;
+        m_nutbam1->setText(Translate::instance().translate("Đã nạp file 2", savedLang));
+        qDebug() << "Loaded file 2:" << filepath3;
     }
 }
+
+void Cuaso::loadFromTranslate(QString filepath) {
+    Translate::instance().loadTranslations(filepath);
+    QString currentLang = Translate::instance().currentLanguage();
+    QSignalBlocker blocker(languageCombo);
+    languageCombo->clear();
+    QStringList langs = Translate::instance().availableLanguages();
+    for (const QString &lang : langs) {
+        int index = languageCombo->count();
+        languageCombo->addItem(lang, lang);
+        languageCombo->setItemIcon(index, QIcon("1.png"));
+    }
+    if (!currentLang.isEmpty() && langs.contains(currentLang)) {
+        int index = languageCombo->findData(currentLang);
+        if (index >= 0)
+            languageCombo->setCurrentIndex(index);
+    }
+}
+
 Cuaso::~Cuaso() {
     saveLastSession();
 }
