@@ -44,7 +44,7 @@ public:
 
     void updateUiTranslations();
     void loadAvailableTranslations();
-    QPushButton *m_nutbam, *m_nutbam1, *m_nutbamss, *sosanh, *m_exit;
+    QPushButton *m_nutbam, *m_nutbam1, *m_nutbamss, *sosanh, *m_exit, *m_export;
     QTableWidget *m_tableWidget;
     QTabWidget *m_tab;
     QComboBox *languageCombo;
@@ -60,7 +60,7 @@ private slots:
     void filterTable(const QString &text);
     void saveLastSession();
     void loadLastSession();
-
+    void exportComparisonResult();
 private:
     void compareSheets(const QXlsx::Document &doc1, const QXlsx::Document &doc2);
     QTableWidget* createTableFromDocument(const QXlsx::Document &doc, int maxRow, int maxCol);

@@ -66,6 +66,7 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     m_nutbamss->hide();
 
     sosanh    = new QPushButton(tr("Click to compare"), this);
+    m_export= new QPushButton(tr("Export file compare"), this);
     m_exit    = new QPushButton(tr("Click to exit"), this);
     searchline = new QLineEdit(this);
     load        = new QProgressBar(this);
@@ -81,6 +82,7 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     m_nutbam1->setStyleSheet(buttonStyle);
     m_nutbamss->setStyleSheet(buttonStyle);
     sosanh->setStyleSheet(buttonStyle);
+    m_export->setStyleSheet(buttonStyle);
     m_exit->setStyleSheet(buttonStyle);
 
     m_tableWidget = new QTableWidget();
@@ -108,6 +110,7 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     buttonLayout->addWidget(m_nutbam1);
     buttonLayout->addWidget(m_nutbamss);
     buttonLayout->addWidget(sosanh);
+    buttonLayout->addWidget(m_export);
     buttonLayout->addWidget(m_exit);
     buttonLayout->addStretch();
 
@@ -124,6 +127,7 @@ Cuaso::Cuaso(QWidget *parent) : QWidget(parent) {
     connect(m_nutbam,  &QPushButton::clicked, this, &Cuaso::loadFile);
     connect(m_nutbam1, &QPushButton::clicked, this, &Cuaso::loadFile3);
     connect(sosanh,    &QPushButton::clicked, this, &Cuaso::compare);
+    connect(m_export, &QPushButton::clicked, this, &Cuaso::exportComparisonResult);
     connect(m_exit,    &QPushButton::clicked, this, &Cuaso::close);
     connect(searchline, &QLineEdit::textChanged, this, &Cuaso::filterTable);
     setAcceptDrops(true);
@@ -385,6 +389,37 @@ void Cuaso::updateUiTranslations() {
         m_tab->setTabText(2, tr("Compare"));
     }
 }
+void Cuaso::exportComparisonResult() {
+    if (!m_tableWidget) {
+        QMessageBox::warning(this, tr("Export Failed"), tr("No comparison data to export!"));
+        return;
+    }
+
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Save Excel File"), "", tr("Excel Files (*.xlsx)"));
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    QXlsx::Document xlsx;
+    int rowCount = m_tableWidget->rowCount();
+    int colCount = m_tableWidget->columnCount();
+
+    for (int row = 0; row < rowCount; ++row) {
+        for (int col = 0; col < colCount; ++col) {
+            QTableWidgetItem *item = m_tableWidget->item(row, col);
+            if (item) {
+                xlsx.write(row + 1, col + 1, item->text());
+            }
+        }
+    }
+
+    if (xlsx.saveAs(filePath)) {
+        QMessageBox::information(this, tr("Export Successful"), tr("File exported successfully!"));
+    } else {
+        QMessageBox::critical(this, tr("Export Failed"), tr("Could not save the file!"));
+    }
+}
+
 
 void Cuaso::saveLastSession() {
     QSettings settings("MyCompany", "MyApp");

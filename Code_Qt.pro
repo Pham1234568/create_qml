@@ -20,7 +20,7 @@ FORMS += \
 
 # Cấu hình QXlsx: Hãy đảm bảo rằng đường dẫn thư viện QXlsx phù hợp với nền tảng
 win32 {
-    QXLSX_PARENTPATH = D:/Code_Qt/QXlsx/QXlsx
+    QXLSX_PARENTPATH = C:\Users\tranv\OneDrive\Desktop\QXlsx\QXlsx
 }
 android {
     # Đối với Android, bạn có thể cần đặt lại đường dẫn thư viện nếu có
