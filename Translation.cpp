@@ -1,7 +1,4 @@
-#include"Translation.h"
-
-#include"xlsxdocument.h"
-
+#include "Translation.h"
 
 Translate& Translate::instance() {
     static Translate inst;
@@ -9,58 +6,27 @@ Translate& Translate::instance() {
 }
 
 Translate::Translate(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+    m_currentLanguage("")
 {
-    m_currentLanguage = "";
 }
 
-bool Translate::loadTranslations(const QString&filePath){
-    QXlsx::Document doc(filePath);
-    int headerRow=1;
-    int firstDataRow = headerRow + 1;
-    int lastRow = doc.dimension().lastRow();
-    int lastCol = doc.dimension().lastColumn();
-
-
-    m_languages.clear();
-
-    for(int col=2;col<=lastCol;col++){
-        QVariant headerValue=doc.read(headerRow,col);
-        QString lang=headerValue.toString().trimmed();
-        m_languages.append(lang);
+bool Translate::loadTranslations(const QString &filePath) {
+    // Loại bỏ translator cũ (nếu có)
+    qApp->removeTranslator(&m_qtTranslator);
+    if (m_qtTranslator.load(filePath)) {
+        qApp->installTranslator(&m_qtTranslator);
+        return true;
     }
-    m_translations.clear();
-
-    for(int row=firstDataRow;row<=lastRow;row++){
-        QVariant keyVar=doc.read(row,1);
-        QString key=keyVar.toString().trimmed();
-
-        for(int col=2;col<=lastCol;col++){
-            if (col - 2 < m_languages.size()) {
-            QString lang=m_languages.at(col-2);
-                QVariant transVar=doc.read(row,col);
-            QString translation = transVar.isValid() ? transVar.toString().trimmed() : "";
-            m_translations[key][lang] = translation;
-        }
-        }
-    }
-
-
-    return true;
-
-}
-Translate::~Translate(){
-     currentLanguage();
-}
-QString Translate::translate(const QString&key,const QString&lang){
-
-    if(m_translations.contains(key)&&m_translations[key].contains(lang))
-        return m_translations[key][lang];
-    return key;
-
+    return false;
 }
 
-QString Translate::currentLanguage()  {
+QString Translate::translate(const QString &key) const {
+    // Sử dụng QObject::tr() để trả về văn bản đã dịch nếu file QM được load thành công
+    return QObject::tr(qPrintable(key));
+}
+
+QString Translate::currentLanguage() const {
     return m_currentLanguage;
 }
 
@@ -68,7 +34,11 @@ void Translate::setCurrentLanguage(const QString &lang) {
     m_currentLanguage = lang;
 }
 
-QStringList Translate::availableLanguages(){
-    return m_languages;
+QStringList Translate::availableLanguages() const {
+    // Không cần dùng nữa, danh sách file QM được load qua combo_box
+    return QStringList();
 }
 
+Translate::~Translate() {
+    // Destructor
+}

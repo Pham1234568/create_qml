@@ -1,50 +1,33 @@
 #ifndef TRANSLATION_H
 #define TRANSLATION_H
 
-#include<QObject>
-#include<QMap>
-#include<QString>
-#include<QStringList>
+#include <QObject>
+#include <QStringList>
+#include <QTranslator>
+#include <QApplication>
 
-
-
-class Translate:public QObject{
+class Translate : public QObject {
     Q_OBJECT
-
 public:
     static Translate& instance();
+    // Load file QM sử dụng QTranslator
     bool loadTranslations(const QString &filePath);
-    QString translate(const QString&key, const QString&lang);
-    QString currentLanguage();
-    void setCurrentLanguage(const QString&lang);
-    QStringList availableLanguages();
-
-    bool isLoaded() const { return !m_filePath.isEmpty(); }
-    QString currentFilePath() const { return m_filePath; }
-    ~Translate();
+    // Hàm dịch: sẽ sử dụng QObject::tr() để trả về văn bản đã dịch
+    QString translate(const QString &key) const;
+    QString currentLanguage() const;
+    void setCurrentLanguage(const QString &lang);
+    QStringList availableLanguages() const; // Không dùng nữa (danh sách được lấy từ combobox)
 
 private:
-
     explicit Translate(QObject *parent = nullptr);
-    QMap<QString, QMap<QString, QString>> m_translations;
-    QStringList m_languages;
+    ~Translate();
+
+    // Không cho phép copy
+    Translate(const Translate &) = delete;
+    Translate &operator=(const Translate &) = delete;
+
     QString m_currentLanguage;
-    bool m_loaded;
-    QString m_filePath;
-
+    QTranslator m_qtTranslator;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif // TRANSLATION_H
